@@ -1,0 +1,139 @@
+apply plugin: 'com.android.application'
+apply plugin: 'walle'
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId "com.bing.plugin"
+        minSdkVersion 19
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        flavorDimensions "default"
+    }
+    signingConfigs {
+        release {
+            storeFile file("./ibaboss.jks")
+            storePassword "1597530"
+            keyAlias "Ibaboss"
+            keyPassword "1597530"
+//            v2SigningEnabled true
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            signingConfig signingConfigs.release
+        }
+    }
+
+
+//    productFlavors{
+//        baidu{
+//            manifestPlaceholders = [CHANNEL_VALUE: "baidu"]
+//        }
+//        xiaomi1{
+//            manifestPlaceholders = [CHANNEL_VALUE: "xiaomi1"]
+//        }
+//        xiaomi2{
+//            manifestPlaceholders = [CHANNEL_VALUE: "xiaomi2"]
+//        }
+//        xiaomi3{
+//            manifestPlaceholders = [CHANNEL_VALUE: "xiaomi3"]
+//        }
+//        xiaomi4{
+//            manifestPlaceholders = [CHANNEL_VALUE: "xiaomi4"]
+//        }
+//        xiaomi5{
+//            manifestPlaceholders = [CHANNEL_VALUE: "xiaomi5"]
+//        }
+//        xiaomi6{
+//            manifestPlaceholders = [CHANNEL_VALUE: "xiaomi6"]
+//        }
+//        xiaomi7{
+//            manifestPlaceholders = [CHANNEL_VALUE: "xiaomi7"]
+//        }
+//        xiaomi8{
+//            manifestPlaceholders = [CHANNEL_VALUE: "xiaomi8"]
+//        }
+//        xiaomi9{
+//            manifestPlaceholders = [CHANNEL_VALUE: "xiaomi9"]
+//        }
+//        xiaomi10{
+//            manifestPlaceholders = [CHANNEL_VALUE: "xiaomi10"]
+//        }
+//        xiaomi11{
+//            manifestPlaceholders = [CHANNEL_VALUE: "xiaomi11"]
+//        }
+//    }
+    task myTask2 {
+        println "myTask 222222"
+    }
+
+//    applicationVariants.all { variant ->
+//        println "输出apk地址:" + project.rootDir.absolutePath
+//        variant.getPackageApplication().outputDirectory = new File(project.rootDir.absolutePath + "/apks")
+//        variant.outputs.all { output ->
+//            def outputFile = output.outputFile
+//            println variant.getBuildType().name
+//            if (variant.buildType.name == 'release') {
+//                //生成apk名字的格式：Channel1.0.0_2016-06-22_baidu.apk
+//                //可自定义自己想要生成的格式
+//                def fileName = "Channel${defaultConfig.versionName}_${variant.productFlavors[0].name}.apk"
+////                output.outputFile = new File(outputFileName.parent, fileName)
+//
+//                println "输出apk地址:" + outputFile.parentFile.absolutePath
+//
+//
+//                outputFileName = new File(fileName)
+//            }
+//        }
+//    }
+}
+task myTask {
+    println "myTask invoked！"
+}
+task forTestingDebug(dependsOn: 'assembleDebug') {
+    println "forTestingDebug"
+    doLast {
+        def date = "_"
+        println "doLast date:${date}"
+    }
+}
+
+afterEvaluate {
+    android.applicationVariants.all { variant ->
+        variant.assemble.doLast {
+            if (variant.buildType.name.contains('release')) {
+                def apkPath = variant.outputs.first().outputFile as File
+                exec {
+                    ignoreExitValue true
+                    commandLine "sh", "../jiagu/jiagu.sh", apkPath, apkPath.getParent()
+                }
+            }
+        }
+    }
+}
+walle {
+    // 指定渠道包的输出路径
+    apkOutputFolder = new File("${project.buildDir}/outputs/channels");
+    // 定制渠道包的APK的文件名称
+    apkFileNameFormat = '${appName}-${packageName}-${channel}.apk';
+    // 渠道配置文件
+    channelFile = new File("${project.getProjectDir()}/channel")
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation 'com.meituan.android.walle:library:1.1.6'
+}
